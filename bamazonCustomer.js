@@ -12,12 +12,16 @@ var connection = mysql.createConnection({
     database: "bamazon_db"
 });
 
+// GLOBAL VARIABLES===============================================================
+// Variable to hold database results to use in other functions 
 var results;
+// Variable to hold customer's chosen item to use in other functions
 var chosenItem;
 
-// Function to display items
+// FUNCTIONS========================================================================
+// Function to show all items
 function showItems() {
-    // Query the database for all items available
+    // Query the database for all items
     connection.query("SELECT * FROM products", function (err, res) {
         if (err) throw err;
 
@@ -134,7 +138,7 @@ function checkInventory() {
             name: "quantity",
             message: "How many of this item would you like to buy?"
         }
-    ]).then(function(answer) {
+    ]).then(function (answer) {
 
         // Convert user input to integer
         var userQuantity = parseInt(answer.quantity);
@@ -146,25 +150,25 @@ function checkInventory() {
 
         } else {
             // If it is a number, check to see if there is enough inventory
-            if (userQuantity <= chosenItem.quantity) {           
+            if (userQuantity <= chosenItem.quantity) {
                 connection.query("UPDATE products SET ? WHERE ?",
-                    [ 
-                      {
-                        quantity: (chosenItem.quantity - userQuantity)
-                      },
-                      {
-                        item_id: chosenItem.item_id
-                      }
+                    [
+                        {
+                            quantity: (chosenItem.quantity - userQuantity)
+                        },
+                        {
+                            item_id: chosenItem.item_id
+                        }
                     ],
-                    function(err) {
-                        if (err) throw err;                                   
+                    function (err) {
+                        if (err) throw err;
                         // If there is enough inventory...
                         // Show the user the total cost 
                         console.log("\nThank you for your order. Your total cost is $" + ((userQuantity * chosenItem.price).toFixed(2)) + ".\n");
 
                         // Ask if they want to shop more
                         shopAgain();
-                    });            
+                    });
             } else {
                 // If there isn't enough inventory, let the user know.
                 console.log("\nYou requested a quantity of " + userQuantity + " but the quantity in stock is only " + chosenItem.quantity + ". Please try a different quantity.\n");
@@ -183,7 +187,7 @@ function shopAgain() {
             name: "shop",
             message: "Do you want to buy something else?"
         }
-    ]).then(function(answer) {
+    ]).then(function (answer) {
         if (answer.shop) {
             // If yes, reset global variables
             results = "";
@@ -198,7 +202,6 @@ function shopAgain() {
         }
     })
 }
-
 
 // MAIN PROCESS====================================================================
 showItems();
