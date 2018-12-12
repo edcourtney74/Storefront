@@ -134,10 +134,10 @@ function checkInventory() {
             name: "quantity",
             message: "How many of this item would you like to buy?"
         }
-    ]).then(function (answer) {
+    ]).then(function(answer) {
 
         // Convert user input to integer
-        var userQuantity = parseInt(answer.quantity)
+        var userQuantity = parseInt(answer.quantity);
 
         // If the user's input is not a number, log to the user to input a number and rerun this function
         if (isNaN(userQuantity)) {
@@ -146,12 +146,25 @@ function checkInventory() {
 
         } else {
             // If it is a number, check to see if there is enough inventory
-            if (userQuantity <= chosenItem.quantity) {
-                // If there is enough inventory...
-                console.log("Next function call will go here");
-                // Show the user the total cost 
-                console.log("Thank you for your order. Your total cost is $" + (userQuantity * chosenItem.price) + ".");
-            
+            if (userQuantity <= chosenItem.quantity) {           
+                connection.query("UPDATE products SET ? WHERE ?",
+                    [ 
+                      {
+                        quantity: (chosenItem.quantity - userQuantity)
+                      },
+                      {
+                        item_id: chosenItem.item_id
+                      }
+                    ],
+                    function(err) {
+                        if (err) throw err;                                   
+                        // If there is enough inventory...
+                        // Show the user the total cost 
+                        console.log("\nThank you for your order. Your total cost is $" + ((userQuantity * chosenItem.price).toFixed(2)) + ".\n");
+
+                        // Ask if they want to shop more
+                        shopAgain();
+                    });            
             } else {
                 // If there isn't enough inventory, let the user know.
                 console.log("\nYou requested a quantity of " + userQuantity + " but the quantity in stock is only " + chosenItem.quantity + ". Please try a different quantity.\n");
@@ -162,12 +175,30 @@ function checkInventory() {
     })
 }
 
-// Ask the customer if they would like to make another purchase.
-//     // If so...
-//     // Go through process again
+function shopAgain() {
+    inquirer.prompt([
+        {
+            // Ask the user if they would like to buy something else
+            type: "confirm",
+            name: "shop",
+            message: "Do you want to buy something else?"
+        }
+    ]).then(function(answer) {
+        if (answer.shop) {
+            // If yes, reset global variables
+            results = "";
+            chosenItem = "";
+            // start process again
+            showItems();
 
-//     // If not...
-//     // Exit app and give instructions how to restart
+        } else {
+            // If the user does not want to shop, give instructions on how to start back up
+            console.log("\nThank you for coming. If you decide to start shopping again, just type in 'node bamazonCustomer'.");
+            connection.end();
+        }
+    })
+}
+
 
 // MAIN PROCESS====================================================================
 showItems();
