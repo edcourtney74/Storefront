@@ -8,7 +8,7 @@ USE bamazon_db;
 
 -- Create "products" table in database
 CREATE TABLE products (
-    item_id INT(10) NOT NULL, AUTO_INCREMENT,
+    item_id INT(10) NOT NULL AUTO_INCREMENT,
     product_name VARCHAR(60) NULL,
     department_name VARCHAR(60) NULL,
     price DECIMAL(10, 2) NULL,
