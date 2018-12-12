@@ -96,37 +96,27 @@ function getItem() {
         {
             type: "input",
             name: "item",
-            message: "Please enter the ID number of the item you would like to order."
+            message: "Please enter the ID number of the item you would like to order.",
+            validate: function (item) {
+                // If the user input is a number...
+                if (isNaN(item) === false) {
+                    // Check to see if it matches an item id in the database
+                    for (let i = 0; i < results.length; i++) {
+                        if (results[i].item_id === parseInt(item)) {
+                            // If it does match, save the info to chosenItem variable
+                            chosenItem = results[i];
+                            return true;
+                        }
+                    }
+                }
+                // If the user input is not a number or does not match an existing ID #, alert the user
+                console.log("\n\nI'm sorry. You did not enter a correct ID number.\n");
+                return false;
+            }
         }
     ]).then(function (answer) {
-        // Convert user input to integer
-        var userItem = parseInt(answer.item)
-
-        // If the user's input is not a number, log to the user to input a number and rerun this function
-        if (isNaN(userItem)) {
-            console.log("I'm sorry. Please make sure to enter a number.\n");
-            getItem();
-
-        } else {
-            // If it is a number, check to see if it matches an item id in the database
-            for (let i = 0; i < results.length; i++) {
-                if (results[i].item_id === userItem) {
-                    // If it does match, save the info to chosenItem variable
-                    chosenItem = results[i];
-                    break;
-                }
-            }
-            // Check to see if chosenItem has any data.
-            if (!chosenItem) {
-                // If it doesn't have data, tell the user to enter a different item # and prompt again
-                console.log("\nI'm sorry. I can't find that item #. Please try again.\n")
-                getItem();
-
-            } else {
-                // If it does have data, call checkInventory
-                checkInventory();
-            }
-        }
+        // Call checkInventory function
+        checkInventory();
     })
 }
 
@@ -136,46 +126,49 @@ function checkInventory() {
         {
             type: "input",
             name: "quantity",
-            message: "How many of this item would you like to buy?"
+            message: "How many of this item would you like to buy?",
+            validate: function (quantity) {
+                // If the user input is a number...
+                if (isNaN(quantity) === false) {
+                    return true;
+                }
+                console.log("\n\nI'm sorry. Please enter a number only.\n");
+                return false;
+            }
         }
     ]).then(function (answer) {
 
         // Convert user input to integer
         var userQuantity = parseInt(answer.quantity);
 
-        // If the user's input is not a number, log to the user to input a number and rerun this function
-        if (isNaN(userQuantity)) {
-            console.log("\nI'm sorry. Please make sure to enter a number.\n");
-            checkInventory();
+        // If it is a number, check to see if there is enough inventory
+        if (userQuantity <= chosenItem.quantity) {
+            console.log("Chosen item quantity: " + chosenItem.quantity)
+            console.log("User quantity: " + userQuantity)
+            connection.query("UPDATE products SET ? WHERE ?",
+                [
+                    {
+                        quantity: (chosenItem.quantity - userQuantity)
+                    },
+                    {
+                        item_id: chosenItem.item_id
+                    }
+                ],
+                function (err) {
+                    if (err) throw err;
+                    // If there is enough inventory...
+                    // Show the user the total cost 
+                    console.log("\nThank you for your order. Your total cost is $" + ((userQuantity * chosenItem.price).toFixed(2)) + ".\n");
 
+                    // Ask if they want to shop more
+                    shopAgain();
+                });
         } else {
-            // If it is a number, check to see if there is enough inventory
-            if (userQuantity <= chosenItem.quantity) {
-                connection.query("UPDATE products SET ? WHERE ?",
-                    [
-                        {
-                            quantity: (chosenItem.quantity - userQuantity)
-                        },
-                        {
-                            item_id: chosenItem.item_id
-                        }
-                    ],
-                    function (err) {
-                        if (err) throw err;
-                        // If there is enough inventory...
-                        // Show the user the total cost 
-                        console.log("\nThank you for your order. Your total cost is $" + ((userQuantity * chosenItem.price).toFixed(2)) + ".\n");
-
-                        // Ask if they want to shop more
-                        shopAgain();
-                    });
-            } else {
-                // If there isn't enough inventory, let the user know.
-                console.log("\nYou requested a quantity of " + userQuantity + " but the quantity in stock is only " + chosenItem.quantity + ". Please try a different quantity.\n");
-                // Let the user try a different amount
-                checkInventory();
-            }
-        }
+            // If there isn't enough inventory, let the user know.
+            console.log("\nYou requested a quantity of " + userQuantity + " but the quantity in stock is only " + chosenItem.quantity + ". Please try a different quantity.\n");
+            // Let the user try a different amount
+            checkInventory();
+        }    
     })
 }
 
