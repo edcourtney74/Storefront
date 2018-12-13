@@ -42,7 +42,7 @@ function managerTask() {
                 addInventory();
                 break;
             case ("Add New Product"):
-                console.log("View product function here");
+                addItem();
                 break;
             default:
                 console.log("Please choose a task.");
@@ -200,6 +200,71 @@ function inventoryPrompt() {
             )
         })
     };
+    
+    
+// Function to add a new item
+function addItem() {
+    // Get info from manager on item to add
+    inquirer.prompt([
+        {
+            // Get product_name
+            type: "input",
+            name: "product",
+            message: "What is the name of the product you would like to add?"
+        },
+        {
+            // Get department
+            type: "list",
+            name: "department",
+            message: "What department is the product in?",
+            choices: ["Books", "Clothing","Electronics","Kitchen","Sports","Toys","Other"]
+        },        
+        {
+            // Get price
+            type: "input",
+            name: "price",
+            message: "What is the price per unit of the product?",
+            validate: function (price) {
+                // If the user input is a number...
+                if (isNaN(price) === false) {
+                    return true;
+                }
+                console.log("\n\nPlease make sure to enter a number.\n");
+                return false;
+            }
+        },
+        {
+            // Get price
+            type: "input",
+            name: "quantity",
+            message: "What quantity of the product is available?",
+            validate: function (quantity) {
+                // If the user input is a number...
+                if (isNaN(quantity) === false) {
+                    return true;
+                }
+                console.log("\n\nPlease make sure to enter a number.\n");
+                return false;
+            }
+        }
+    ]).then(function (answer) {
+        // Insert new item into database
+        connection.query(
+        "INSERT INTO products SET ?",
+        {
+          product_name: answer.product,
+          department_name: answer.department,
+          price: parseFloat(answer.price),
+          quantity: parseFloat(answer.quantity)
+        },
+        function(err) {
+          if (err) throw err;
+        // Display products and ask for another task
+        viewProducts();        
+        }
+      );
+    })
+}
 
 function anotherTask() {
     inquirer.prompt([
@@ -226,9 +291,7 @@ function anotherTask() {
 };
 
 
-//   * If a manager selects `Add to Inventory`, your app should display a prompt that will let the manager "add more" of any item currently in the store.
 
-//   * If a manager selects `Add New Product`, it should allow the manager to add a completely new product to the store.
 
 // MAIN PROCESS====================================================================
 managerTask();
