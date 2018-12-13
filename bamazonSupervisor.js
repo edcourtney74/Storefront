@@ -70,7 +70,7 @@ function display(taskQuery, func) {
                 res[i].product_sales = 0;
             }
             initialArray.push("$" + res[i].product_sales);
-            initialArray.push("$" + (res[i].product_sales - res[i].overhead_costs));
+            initialArray.push("$" + (res[i].product_sales - res[i].overhead_costs).toFixed(2));
 
             // Push the new initialArray into dataArray
             data.push(initialArray);

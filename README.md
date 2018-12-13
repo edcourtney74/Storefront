@@ -18,6 +18,10 @@ A command-line storefront app using Node.js and MySQL that allows customers, man
   * The customer is then asked the quantity they would like to buy.
   * The database is updated with the order information.
   * The customer receives a thank-you prompt that includes the total cost of the purchase.
+#### Screencast
+  * Below the customer purchases all 72 Slinkies, and when the table is displayed again, the item's quantity is now 0.
+  ![Customer photo](https://github.com/edcourtney74/Storefront/blob/master/images/customer_process.gif "Customer process")
+
 
 ## Manager View
   * The manager initiates the session by typing "node bamazonManager.js".
@@ -30,6 +34,12 @@ A command-line storefront app using Node.js and MySQL that allows customers, man
   * Allows the manager to add more quantity to a specific item.
 ### Add New Product
   * Asks the manager for the new product's name, department, price and quantity. The produce is then added to the database.
+#### Screencasts
+  * Below the manager is given a list of tasks. The manager selects View Products for Sale and sees the same view the customer does. When the manager selects View Low Inventory, the Slinky item information is displayed because the previous customer bought all the Slinkies. The manager then selects Add to Inventory and adds 15 back to the Slinky item. When the manager selects View Products for Sale again, the Slinky now has a quantity of 15.
+  ![Manager-inventory photo](https://github.com/edcourtney74/Storefront/blob/master/images/manager_add_inv.gif "Manager inventory process")
+
+  * Below the manager selects Add New Product. After following the prompts and entering the information, the new products are automatically displayed again, and the new pizza stone item is in the database now.
+  ![Manager-add-item photo](https://github.com/edcourtney74/Storefront/blob/master/images/manager_add_item.gif "Manager add item process")
 
 ## Supervisor View
   * The supervisor initiates the session by typing "node bamazonSupervisor.js".
@@ -42,4 +52,12 @@ A command-line storefront app using Node.js and MySQL that allows customers, man
 ### Create New Department
   * Supervisor enters the department name and overhead costs. 
   * A department ID is assigned automatically.
+  * New department is added to the database.
+#### Screencast
+  * Below the supervisor looks at a department listing. Then the supervisor adds a department, entering a name and the overhead costs. Then when the listing is shown again, the new department has been added and is shown alphabetically.
+  ![Supervisor photo](https://github.com/edcourtney74/Storefront/blob/master/images/manager_add_item.gif "Supervisor process")
+
+## Error Handling Examples
+  * The below example in Manager View/Add to Inventory is an example of error handling found throughout the app. When selecting an item ID, validation makes sure the item ID number is already contained in the database. If it's not, the user is prompted to enter a correct ID number. When the manager inputs a quantity to add, validation makes sure the manager input was actually a number. 
+  ![Error handling photo](https://github.com/edcourtney74/Storefront/blob/master/images/manager_add_item.gif "Error handling")
 
