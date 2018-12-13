@@ -59,5 +59,5 @@ A command-line storefront app using Node.js and MySQL that allows customers, man
 
 ## Error Handling Examples
   * The below example in Manager View/Add to Inventory is an example of error handling found throughout the app. When selecting an item ID, validation makes sure the item ID number is already contained in the database. If it's not, the user is prompted to enter a correct ID number. When the manager inputs a quantity to add, validation makes sure the manager input was actually a number. 
-  ![Error handling photo](https://github.com/edcourtney74/Storefront/blob/master/images/manager_add_item.gif "Error handling")
+  ![Error handling photo](https://github.com/edcourtney74/Storefront/blob/master/images/error_handling.gif "Error handling")
 
