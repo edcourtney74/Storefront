@@ -1,4 +1,4 @@
-// Import mysql, inquirer and table npm's and bamazonCustomer.js
+// Import mysql, inquirer and table npm's
 var mysql = require("mysql");
 var inquirer = require("inquirer");
 var { table } = require("table");
@@ -15,14 +15,14 @@ var connection = mysql.createConnection({
 // GLOBAL VARIABLES===============================================================
 // Variable to hold database results to use in other functions 
 var results;
-// Variable to hold customer's chosen item to use in other functions
+// Variable to hold chosen item to use in other functions
 var chosenItem;
 
 // FUNCTIONS========================================================================
 // Function to ask supervisor what task to run and call corresponding function
 function supervisorTask() {
     inquirer.prompt([
-        // Ask manager which task to run
+        // Ask supervisor which task to run
         {
             type: "list",
             name: "task",
@@ -30,7 +30,7 @@ function supervisorTask() {
             message: "What would you like to do?"
         }
     ]).then(function (answer) {
-        // Call functions based on manager selection
+        // Call functions based on supervisor selection
         switch (answer.task) {
             case ("View Product Sales by Department"):
                 viewSales();
@@ -64,6 +64,11 @@ function display(taskQuery, func) {
             initialArray.push(res[i].department_id);
             initialArray.push(res[i].department_name);
             initialArray.push("$" + res[i].overhead_costs);
+            // Check to see if product_sales has a null value. This happens when a new department is created in the departments table but a product has not been assigned to the department in the products table yet
+            if (!res[i].product_sales) {
+                // If null, give value of 0
+                res[i].product_sales = 0;
+            }
             initialArray.push("$" + res[i].product_sales);
             initialArray.push("$" + (res[i].product_sales - res[i].overhead_costs));
 
@@ -108,7 +113,6 @@ function display(taskQuery, func) {
         // Console log table
         console.log("\n\n" + output);
 
-
         // Run callback function
         func();
     })
@@ -116,8 +120,8 @@ function display(taskQuery, func) {
 
 // Function for viewing product sales by department
 function viewSales() {
-    // Call displayFunction with query, will group by department_name
-    display("SELECT departments.department_id, departments.department_name, departments.overhead_costs, products.product_sales FROM products RIGHT JOIN departments ON products.department_name = departments.department_name GROUP BY departments.department_name ORDER BY departments.department_id", anotherTask);
+    // Call displayFunction with query, will group by department_name, order by department name
+    display("SELECT departments.department_id, departments.department_name, departments.overhead_costs, products.product_sales FROM products RIGHT JOIN departments ON products.department_name = departments.department_name GROUP BY departments.department_name ORDER BY departments.department_name", anotherTask);
 }
 
 // Function to add a new department
@@ -164,7 +168,7 @@ function addDepartment() {
 function anotherTask() {
     inquirer.prompt([
         {
-            // Ask the user if they would like to buy something else
+            // Ask the supervisor if they would like to do something else
             type: "confirm",
             name: "anotherTask",
             message: "Do you want to do something else?"
@@ -178,7 +182,7 @@ function anotherTask() {
             supervisorTask();
 
         } else {
-            // If the user does not want to shop, give instructions on how to start back up
+            // If the supervisor does not want to continue, gives instructions on how to start back up
             console.log("\nThank you. Type in 'node bamazonSupervisor' when you want to do another task.");
             connection.end();
         }

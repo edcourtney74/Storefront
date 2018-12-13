@@ -143,8 +143,6 @@ function checkInventory() {
 
         // If it is a number, check to see if there is enough inventory
         if (userQuantity <= chosenItem.quantity) {
-            console.log("Chosen item quantity: " + chosenItem.quantity)
-            console.log("User quantity: " + userQuantity)
             connection.query("UPDATE products SET ? WHERE ?",
                 [
                     {

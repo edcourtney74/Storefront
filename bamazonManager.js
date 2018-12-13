@@ -1,4 +1,4 @@
-// Import mysql, inquirer and table npm's and bamazonCustomer.js
+// Import mysql, inquirer and table npm's
 var mysql = require("mysql");
 var inquirer = require("inquirer");
 var { table } = require("table");
@@ -15,7 +15,7 @@ var connection = mysql.createConnection({
 // GLOBAL VARIABLES===============================================================
 // Variable to hold database results to use in other functions 
 var results;
-// Variable to hold customer's chosen item to use in other functions
+// Variable to hold chosen item to use in other functions
 var chosenItem;
 
 // FUNCTIONS========================================================================
@@ -52,7 +52,7 @@ function managerTask() {
 
 // Function to display query results in a table
 function display(taskQuery, func) {
-    // Query the database for all items
+    // Query the database
     connection.query(taskQuery, function (err, res) {
         if (err) throw err;
 
@@ -113,7 +113,6 @@ function display(taskQuery, func) {
 
         // Console log table
         console.log("\n\n" + output);
-
 
         // Run callback function
         func();
@@ -177,30 +176,29 @@ function inventoryPrompt() {
                 return false;
             }
         }
-        ]).then(function (answer) {
-            var managerQuantity = parseInt(answer.quantity);
+    ]).then(function (answer) {
+        // Set quantity entered to an integer
+        var managerQuantity = parseInt(answer.quantity);
 
-            // Send new query to update database          
-            connection.query("UPDATE products SET ? WHERE ?",
-                [
-                    {
-                        quantity: (chosenItem.quantity + managerQuantity)
-                    },
-                    {
-                        item_id: chosenItem.item_id
-                    }
-                ],
-
-                function (err) {
-                    if (err) throw err;
-
-                    // Display products and ask for another task
-                    viewProducts();
+        // Send new query to update database          
+        connection.query("UPDATE products SET ? WHERE ?",
+            [
+                {
+                    quantity: (chosenItem.quantity + managerQuantity)
+                },
+                {
+                    item_id: chosenItem.item_id
                 }
-            )
-        })
-    };
-    
+            ],
+            function (err) {
+            if (err) throw err;
+
+            // Display products and ask for another task
+            viewProducts();
+            }
+        )
+    })
+};    
     
 // Function to add a new item
 function addItem() {
@@ -233,7 +231,7 @@ function addItem() {
             }
         },
         {
-            // Get price
+            // Get quantity
             type: "input",
             name: "quantity",
             message: "What quantity of the product is available?",
@@ -268,7 +266,7 @@ function addItem() {
 function anotherTask() {
     inquirer.prompt([
         {
-            // Ask the user if they would like to buy something else
+            // Ask the manager if they would like to do something else
             type: "confirm",
             name: "anotherTask",
             message: "Do you want to do something else?"
@@ -282,15 +280,12 @@ function anotherTask() {
             managerTask();
 
         } else {
-            // If the user does not want to shop, give instructions on how to start back up
+            // If the manager does not want to continue, gives instructions on how to start back up
             console.log("\nThank you. Type in 'node bamazonManager' when you want to do another task.");
             connection.end();
         }
     })
 };
-
-
-
 
 // MAIN PROCESS====================================================================
 managerTask();
