@@ -148,7 +148,8 @@ function checkInventory() {
             connection.query("UPDATE products SET ? WHERE ?",
                 [
                     {
-                        quantity: (chosenItem.quantity - userQuantity)
+                        quantity: (chosenItem.quantity - userQuantity),
+                        product_sales: (chosenItem.price * userQuantity)
                     },
                     {
                         item_id: chosenItem.item_id

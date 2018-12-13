@@ -13,6 +13,7 @@ CREATE TABLE products (
     department_name VARCHAR(60) NULL,
     price DECIMAL(10, 2) NULL,
     quantity INT(10) NULL,
+    product_sales DECIMAL(10,2) NULL,
     PRIMARY KEY (item_id)
 );
 
@@ -28,3 +29,13 @@ INSERT INTO products (product_name, department_name, price, quantity) VALUES
 ("Baseball mitt", "Sports", 45.13, 21),
 ("The Underground Railroad", "Books", 14.92, 103),
 ("Playstation 4", "Electronics", 299.99, 258);
+
+CREATE TABLE departments (
+    department_id INT(10) NULL,
+    department_name VARCHAR(60) NULL,
+    overhead_costs DECIMAL(10, 2) NULL,
+    PRIMARY KEY(department_id)
+)
+
+INSERT INTO departments (department_id, department_name, overhead_costs) VALUES
+(1, "Books", 350), (2, "Clothing", 725), (3, "Electronics", 2500), (4, "Kitchen", 1200), (5, "Sports", 1800), (6, "Toys", 920);
