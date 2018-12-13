@@ -51,7 +51,7 @@ function managerTask() {
 }
 
 // Function to display query results in a table
-function display(taskQuery) {
+function display(taskQuery, func) {
     // Query the database for all items
     connection.query(taskQuery, function (err, res) {
         if (err) throw err;
@@ -113,99 +113,93 @@ function display(taskQuery) {
 
         // Console log table
         console.log("\n\n" + output);
-        
-        // Call anotherTask function to show the user prompt
-        anotherTask();
+
+
+        // Run callback function
+        func();
     })
 }
 
 // Function to show all items
 function viewProducts() {
     // Call displayFunction with query
-    display("SELECT * FROM products");    
+    display("SELECT * FROM products", anotherTask);
 };
 
 // Function show low inventory
 function lowInventory() {
     // Call displayFunction with query
-    display("SELECT * FROM products WHERE quantity < 5");
+    display("SELECT * FROM products WHERE quantity < 5", anotherTask);
 };
 
 // Function to add to inventory
 function addInventory() {
+    // Display products first so manager can see the info
+    display("SELECT * FROM products", inventoryPrompt);
+}
+
+// Function to start inventory prompts
+function inventoryPrompt() {
     // Ask manager for item #
     inquirer.prompt([
         {
             type: "input",
             name: "item",
-            message: "Please enter the correct item #:"
-        }
-    
-    ]).then(function (answer) {
-        // Convert user input to integer
-        var managerItem = parseInt(answer.item)
-
-        // If the manager's input is not a number, log to the manager to input a number and rerun this function
-        if (isNaN(managerItem)) {
-            console.log("I'm sorry. Please make sure to enter a number.\n");
-            addInventory();
-
-        } else {
-            // If it is a number, check to see if it matches an item id in the database
-            for (let i = 0; i < results.length; i++) {
-                if (results[i].item_id === managerItem) {
-                    // If it does match, save the info to chosenItem variable
-                    chosenItem = results[i];
-                    break;
-                }
-            }
-            // Check to see if chosenItem has any data.
-            if (!chosenItem) {
-                // If it doesn't have data, tell the manager to enter a different item # and prompt again
-                console.log("\nI'm sorry. I can't find that item #. Please try again.\n")
-                addInventory();
-
-            } else {
-                inquirer.prompt([
-                    // Ask manager how many to add to the quantity
-                    {
-                        type: "input",
-                        name: "quantity",
-                        message: "You selected " + chosenItem.product_name + ". How many of this product would you like to add?"
-                    }
-                ]).then (function(answer1) {
-                    // Convert user input to integer
-                    var managerQuantity = parseInt(answer1.quantity);
-
-                    // If the manager's input is not a number, log to the manager to input a number and rerun this function
-                    if (isNaN(managerQuantity)) {
-                        console.log("I'm sorry. Please make sure to enter a number.\n");
-                        addInventory();
-    
-                    } else {
-                        // Send new query to update database          
-                        connection.query("UPDATE products SET ? WHERE ?",
-                        [
-                            {
-                                quantity: (chosenItem.quantity + managerQuantity)
-                            },
-                            {
-                                item_id: chosenItem.item_id
-                            }
-                        ],
-                        
-                        function (err) {
-                        if (err) throw err;
-                        
-                        // Display products and ask for another task
-                        viewProducts();    
+            message: "Please enter the item # for the product you'd like to add to:",
+            validate: function (item) {
+                // If the user input is a number...
+                if (isNaN(item) === false) {
+                    // Check to see if it matches an item id in the database
+                    for (let i = 0; i < results.length; i++) {
+                        if (results[i].item_id === parseInt(item)) {
+                            // If it does match, save the info to chosenItem variable
+                            chosenItem = results[i];
+                            return true;
                         }
-                    )}
-                });
+                    }
+                }
+                // If the user input is not a number or does not match an existing ID #, alert the user
+                console.log("\n\nI'm sorry. You did not enter a correct ID number.\n");
+                return false;
+            }
+        },
+        // Ask manager how many to add to the quantity
+        {
+            type: "input",
+            name: "quantity",
+            message: "How many of this product would you like to add?",
+            validate: function (quantity) {
+                // If the user input is a number...
+                if (isNaN(quantity) === false) {
+                    return true;
+                }
+                console.log("\n\nPlease make sure to enter a number.\n");
+                return false;
             }
         }
-    }    
-)};
+        ]).then(function (answer) {
+            var managerQuantity = parseInt(answer.quantity);
+
+            // Send new query to update database          
+            connection.query("UPDATE products SET ? WHERE ?",
+                [
+                    {
+                        quantity: (chosenItem.quantity + managerQuantity)
+                    },
+                    {
+                        item_id: chosenItem.item_id
+                    }
+                ],
+
+                function (err) {
+                    if (err) throw err;
+
+                    // Display products and ask for another task
+                    viewProducts();
+                }
+            )
+        })
+    };
 
 function anotherTask() {
     inquirer.prompt([
