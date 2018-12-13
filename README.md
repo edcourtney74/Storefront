@@ -15,5 +15,11 @@ A command-line storefront app that allows customers, managers and supervisors to
   * The customer is then asked the quantity they would like to buy.
   * The database is updated with the order information.
   * The customer receives a thank-you prompt that includes the total cost of the purchase.
-  * The customer is asked if they would like to make another purchase. 
+  * The customer is asked if they would like to make another purchase. If so, they are prompted to choose another product. If not, the customer is given instructions for how to shop again, and the session is ended.
+
+## Manager View
+  * The manager initiates the session by typing "node bamazonManager.js".
+  * The manager is given four tasks to choose from.
+### View Products for Sale
+  * 
 

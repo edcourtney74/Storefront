@@ -36,7 +36,7 @@ function supervisorTask() {
                 viewSales();
                 break;
             case ("Create New Department"):
-                console.log("Create New Department function here");
+                addDepartment();
                 break;
             default:
                 console.log("Please choose a task.");
@@ -56,7 +56,7 @@ function display(taskQuery, func) {
         // Create initialArray variable to hold values returned
         var initialArray = [];
         // Create data variable to hold initialArray values, plus column headers
-        data = [["Department ID", "Department Name", "Overhead Costs"]];
+        data = [["Department ID", "Department Name", "Overhead Costs", "Product Sales", "Total Profit"]];
 
         // Use for loop to go through each item returned to display in table
         for (let i = 0; i < res.length; i++) {
@@ -64,8 +64,8 @@ function display(taskQuery, func) {
             initialArray.push(res[i].department_id);
             initialArray.push(res[i].department_name);
             initialArray.push("$" + res[i].overhead_costs);
-            // initialArray.push("$" + res[i].product_sales);
-            // initialArray.push(res[i].quantity);
+            initialArray.push("$" + res[i].product_sales);
+            initialArray.push("$" + (res[i].product_sales - res[i].overhead_costs));
 
             // Push the new initialArray into dataArray
             data.push(initialArray);
@@ -81,24 +81,24 @@ function display(taskQuery, func) {
         config = {
             columns: {
                 0: {
-                    alignment: 'left',
-                    minWidth: 10
+                    alignment: 'right',
+                    minWidth: 5
                 },
                 1: {
                     alignment: 'left',
-                    minWidth: 10
+                    minWidth: 5
                 },
                 2: {
                     alignment: 'left',
-                    minWidth: 10
+                    minWidth: 5
                 },
                 3: {
                     alignment: 'right',
-                    minWidth: 10
+                    minWidth: 5
                 },
                 4: {
                     alignment: 'right',
-                    minWidth: 10
+                    minWidth: 5
                 }
             }
         };
@@ -116,27 +116,50 @@ function display(taskQuery, func) {
 
 // Function for viewing product sales by department
 function viewSales() {
-    // Call displayFunction with query
-    display("SELECT * FROM departments", anotherTask);
+    // Call displayFunction with query, will group by department_name
+    display("SELECT departments.department_id, departments.department_name, departments.overhead_costs, products.product_sales FROM products RIGHT JOIN departments ON products.department_name = departments.department_name GROUP BY departments.department_name ORDER BY departments.department_id", anotherTask);
 }
-// 4. When a supervisor selects `View Product Sales by Department`, the app should display a summarized table in their terminal/bash window. Use the table below as a guide.
 
-// | department_id | department_name | over_head_costs | product_sales | total_profit |
-// | ------------- | --------------- | --------------- | ------------- | ------------ |
-// | 01            | Electronics     | 10000           | 20000         | 10000        |
-// | 02            | Clothing        | 60000           | 100000        | 40000        |
-
-// 5. The `total_profit` column should be calculated on the fly using the difference between `over_head_costs` and `product_sales`. `total_profit` should not be stored in any database. You should use a custom alias.
-
-// 6. If you can't get the table to display properly after a few hours, then feel free to go back and just add `total_profit` to the `departments` table.
-
-//    * Hint: You may need to look into aliases in MySQL.
-
-//    * Hint: You may need to look into GROUP BYs.
-
-//    * Hint: You may need to look into JOINS.
-
-//    * **HINT**: There may be an NPM package that can log the table to the console. What's is it? Good question :)
+// Function to add a new department
+function addDepartment() {
+    // Get info from supervisor on department to add
+    inquirer.prompt([
+        {
+            // Get department_name
+            type: "input",
+            name: "department",
+            message: "What is the name of the department you would like to add?"
+        },
+        {
+            // Get overhead costs
+            type: "input",
+            name: "overhead",
+            message: "What are the overhead costs for the department?",
+            validate: function (price) {
+                // If the user input is a number...
+                if (isNaN(price) === false) {
+                    return true;
+                }
+                console.log("\n\nPlease make sure to enter a number.\n");
+                return false;
+            }
+        }        
+    ]).then(function (answer) {
+        // Insert new department into database
+        connection.query(
+        "INSERT INTO departments SET ?",
+        {
+          department_name: answer.department,
+          overhead_costs: parseFloat(answer.overhead)
+        },
+        function(err) {
+          if (err) throw err;
+        // Ask for another task
+        anotherTask();        
+        }
+      );
+    })
+}
 
 function anotherTask() {
     inquirer.prompt([
@@ -162,5 +185,5 @@ function anotherTask() {
     })
 };
 
-// MAIN PROCESS
+// MAIN PROCESS================================================================
 supervisorTask();

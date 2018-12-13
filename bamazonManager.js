@@ -214,10 +214,9 @@ function addItem() {
         },
         {
             // Get department
-            type: "list",
+            type: "input",
             name: "department",
-            message: "What department is the product in?",
-            choices: ["Books", "Clothing","Electronics","Kitchen","Sports","Toys"]
+            message: "What department is the product in?"
         },        
         {
             // Get price
